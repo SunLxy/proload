@@ -297,4 +297,7 @@ load.use = (plugins: PluginType[]) => {
   load.plugins = [...load.plugins, ...plugins]
 }
 export default load
+
+export const proloadLoad = load
+
 export { resolveConfig as resolve }
