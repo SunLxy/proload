@@ -1,7 +1,0 @@
-{
-    "name": "package-json-test",
-    "private": true,
-    "test": {
-        "value": "package"
-    }
-}

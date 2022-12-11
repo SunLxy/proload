@@ -1,33 +1,64 @@
-name: CI
-on: [push, pull_request]
+name: Build & Deploy
+on:
+  push:
+    branches:
+      - main
+env:
+  SKIP_PREFLIGHT_CHECK: true
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node_version: [12, 14, 16]
-        include:
-          - os: windows-latest
-            node_version: 16
-      fail-fast: false
-    name: 'Test: node-${{ matrix.node_version }}, ${{ matrix.os }}'
+  build-deploy:
+    runs-on: ubuntu-18.04
     steps:
-      - name: Check out code using Git
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
 
-      - name: Set Node version to ${{ matrix.node_version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node_version }}
-          cache: 'yarn'
+    - name: Look Changelog
+      uses: jaywcjlove/changelog-generator@v1.6.2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        filter-author: (小弟调调™|Renovate Bot)
+        filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
 
-      - name: Debug
-        run: yarn versions
+    - run: npm install
+    - run: npm run build
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-engines
+    - name: Create Tag
+      id: create_tag
+      uses: jaywcjlove/create-tag-action@v1.3.5
+      with:
+        package-path: ./core/package.json
 
-      - name: Test
-        run: yarn test
+    - name: Generate changelog
+      id: changelog
+      uses: jaywcjlove/changelog-generator@v1.6.2
+      if: steps.create_tag.outputs.successful
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        head-ref: ${{steps.create_tag.outputs.version}}
+        filter-author: (小弟调调™|Renovate Bot)
+        filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
+
+    - name: Create Release
+      uses: jaywcjlove/create-tag-action@v1.3.5
+      with:
+        package-path: ./core/package.json
+        release: true
+        body: |
+          ```bash
+          npm i carefree-proload@${{steps.changelog.outputs.version}}
+          ```
+
+          ${{ steps.changelog.outputs.compareurl }}
+
+          ${{ steps.changelog.outputs.changelog }}
+
+    - run: echo ${{ steps.changelog.outputs.tag }}
+
+    # - name: 📦 carefree-proload publish to NPM
+    #   uses: kktjs/npm-publish@main
+    #   with:
+    #     token: ${{ secrets.NPM_TOKEN }}
+    #     package: ./core/package.json

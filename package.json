@@ -2,23 +2,13 @@
   "name": "@proload/root",
   "private": true,
   "scripts": {
-    "test": "uvu packages test"
+    "build": "npm run-script build --workspace carefree-proload",
+    "watch": "npm run-script watch --workspace carefree-proload"
   },
   "devDependencies": {
-    "@types/node": "^14.14.25",
-    "uvu": "^0.5.1"
+    "tsbb": "^3.7.9"
   },
   "workspaces": [
-    "packages/*"
-  ],
-  "volta": {
-    "node": "12.20.1",
-    "yarn": "1.22.10"
-  },
-  "engines": {
-    "node": ">=12.20.1"
-  },
-  "dependencies": {
-    "@changesets/cli": "^2.18.0"
-  }
+    "core"
+  ]
 }

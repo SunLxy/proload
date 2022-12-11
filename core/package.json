@@ -1,0 +1,20 @@
+{
+  "name": "carefree-proload",
+  "version": "1.0.0",
+  "description": "proload",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "watch": "tsbb watch --disable-babel",
+    "build": "tsbb build --disable-babel"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "devDependencies": {
+    "tsbb": "^3.7.9"
+  },
+  "dependencies": {
+    "deepmerge": "^4.2.2",
+    "escalade": "^3.1.1"
+  }
+}
