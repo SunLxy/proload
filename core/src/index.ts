@@ -5,7 +5,7 @@ import { existsSync, readdir, readFile, stat } from 'fs'
 import { promisify } from 'util'
 import requireOrImport from './requireOrImport'
 import { assert, ProloadError } from './error'
-import { PluginType, LoadOptions } from './interface'
+import { PluginType, LoadOptions, Config } from './interface'
 export { ProloadError }
 export * from './interface'
 
@@ -173,7 +173,7 @@ async function resolveConfig(namespace: string, opts: LoadOptions = {}) {
     merge = opts.merge
   }
 
-  let filePath
+  let filePath: string
   if (typeof opts.filePath === 'string') {
     const absPath = opts.filePath.startsWith('.')
       ? resolve(opts.filePath, input)
@@ -182,7 +182,7 @@ async function resolveConfig(namespace: string, opts: LoadOptions = {}) {
       filePath = absPath
     }
   } else {
-    filePath = await escalade(input, async (dir, names) => {
+    filePath = (await escalade(input, async (dir, names) => {
       if (accept) {
         for (const n of names) {
           if (accept(n, { directory: dir }) === true) return n
@@ -214,7 +214,7 @@ async function resolveConfig(namespace: string, opts: LoadOptions = {}) {
           )
         if (contents[namespace]) return 'package.json'
       }
-    })
+    })) as string
   }
 
   if (mustExist) {
@@ -234,7 +234,10 @@ async function resolveConfig(namespace: string, opts: LoadOptions = {}) {
  * @param {string} namespace
  * @param {import('../index').LoadOptions} opts
  */
-async function load(namespace: string, opts: any = {}) {
+async function load<T extends Record<any, any> = Record<any, any>>(
+  namespace: string,
+  opts: LoadOptions<T> = {},
+): Promise<Config<T> | undefined> {
   const { context } = opts
   let mustExist = true
   if (typeof opts.mustExist !== 'undefined') {

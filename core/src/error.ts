@@ -1,9 +1,14 @@
-/**
- * @type import('./error').ProloadError
- */
+export type Message = string | Error
+
+export type PROLOAD_ERROR_CODE = 'ERR_PROLOAD_INVALID' | 'ERR_PROLOAD_NOT_FOUND'
 export class ProloadError extends Error {
   code?: string
-  constructor(opts: any = {}) {
+  constructor(
+    opts: {
+      message?: string
+      code?: string
+    } = {},
+  ) {
     super(opts.message)
     this.name = 'ProloadError'
     this.code = opts.code || 'ERR_PROLOAD_INVALID'
@@ -12,11 +17,11 @@ export class ProloadError extends Error {
     }
   }
 }
-
-/**
- * @type import('./error.cjs').assert
- */
-export function assert(bool?: any, message?: any, code?: any) {
+export function assert(
+  bool?: boolean,
+  message?: Message,
+  code?: PROLOAD_ERROR_CODE,
+) {
   if (bool) return
   if (message instanceof Error) throw message
   throw new ProloadError({ message, code })

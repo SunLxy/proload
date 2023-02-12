@@ -1,10 +1,13 @@
 import { pathToFileURL } from 'url'
+import { PluginType } from './interface'
 
 export default async function requireOrImport(
   filePath: string,
   { middleware = [] }: any = {},
 ) {
-  await Promise.all(middleware.map((plugin: any) => plugin.register(filePath)))
+  await Promise.all(
+    middleware.map((plugin: PluginType) => plugin.register(filePath)),
+  )
 
   return new Promise(async (resolve, reject) => {
     try {
